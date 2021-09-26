@@ -8,5 +8,6 @@
 #' @importFrom stats p.adjust
 #' @importFrom stats setNames
 #' @importFrom stats shapiro.test
+#' @importFrom stats terms
 ## usethis namespace: end
 NULL
