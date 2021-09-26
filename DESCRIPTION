@@ -13,5 +13,14 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
+    broom,
+    car,
+    dplyr,
+    glue,
     magrittr,
-    rlang
+    purrr,
+    rlang,
+    stats,
+    tibble,
+    tidyr,
+    tidyselect
