@@ -108,7 +108,8 @@ pca_scree_plot <- function(pca_recipe, # after prep()
 #' Plot Loading Score from PCA
 #'
 #' @param pca_recipe Object class recipe that already `step_pca`
-#' @param component Integer vector indicate which PCs to show, the default "all" shows every components.
+#' @param num_comp Integer vector indicate which PCs to show.
+#' @param num_top_vars Integer indicate number of top variables, ranking by absolute loading score, to show. Default `Inf` means all variables.
 #' @param fill (character) Fill of positive & negative values
 #' @param nrow (numeric) Number of rows in facet
 #' @param ncol (numeric) Number of columns in facet
@@ -130,7 +131,8 @@ pca_scree_plot <- function(pca_recipe, # after prep()
 #'   prep_pca() %>%
 #'   pca_load_plot()
 pca_load_plot <- function(pca_recipe,
-                          component = "all",
+                          num_comp = 1:4,
+                          num_top_vars = Inf,
                           fill = c("#b6dfe2", "#0A537D"),
                           nrow = NULL, ncol = NULL,
                           ...) { # To geom_col
@@ -145,18 +147,15 @@ pca_load_plot <- function(pca_recipe,
   load_df <- pca_recipe %>%
     yardstick::tidy(id = "pca")
 
-  num_comp <-  if(component == "all"){
-    load_df %>%
-      dplyr::pull(component) %>%
-      unique() %>%
-      stringr::str_extract("[:digit:]+")
-  }else if(is.numeric(component)){
-    component
-  }else{ stop("`component must be 'all' or integer vector", call. = F) }
 
   load_df_mod <- load_df %>%
     # Filter Components
-    dplyr::filter(component %in% c(paste0("PC", num_comp ))) %>%
+    dplyr::filter(component %in% c(paste0("PC", num_comp))) %>%
+    # Filter Variables
+    dplyr::group_by(component) %>%
+    dplyr::slice_max(abs(value), n = num_top_vars) %>%
+    dplyr::ungroup() %>%
+
     dplyr::mutate(component = forcats::as_factor(component)) %>%
     dplyr::mutate(component = forcats::fct_inorder(component)) %>%
     dplyr::mutate(terms = tidytext::reorder_within(terms,
