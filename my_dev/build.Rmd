@@ -1,0 +1,115 @@
+---
+title: "Build - LB Modeling"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # Set WD to Root
+here::i_am("my_dev/build.Rmd")
+library(here)
+
+```
+
+
+# Git & Build
+
+```{r}
+usethis::use_git()
+```
+
+## Git Ignore
+
+```{r}
+usethis::use_git_ignore("my_dev")
+```
+
+## Build Ignore
+
+```{r}
+usethis::use_build_ignore("my_dev")
+```
+
+# DOCs
+
+## README
+
+```{r}
+usethis::use_readme_rmd()
+
+usethis::use_lifecycle_badge("experimental")
+```
+
+
+## DESCRIPTION
+
+```{r}
+usethis::use_description(
+  fields = list(
+  Title = "Statistic & Modeling Function",
+    `Authors@R` = 'person("Kittipos", "Sirivongrungson", email = "ki11ip0.s.a.s@gmail.com", role = c("aut", "cre"))',
+    Description = "My wrapper package of various statistical and machine learning functions.",
+    License = "MIT + file LICENSE"
+)
+)
+```
+
+## Licences
+
+```{r}
+usethis::use_mit_license()
+```
+
+
+
+
+
+# Dependencies
+
+## Import
+
+```{r}
+usethis::use_pipe()
+usethis::use_package("rlang") 
+
+usethis::use_package("tidyselect") 
+usethis::use_package("stringr")
+usethis::use_package("tidytext")
+usethis::use_package("tibble") 
+usethis::use_package("forcats")
+usethis::use_package("dplyr") 
+usethis::use_package("purrr") 
+usethis::use_package("tidyr") 
+usethis::use_package("glue") 
+
+### Plot
+usethis::use_package(c("ggplot2"))
+usethis::use_package(c("ggrepel"))
+
+### Model
+usethis::use_package("car") 
+usethis::use_package("broom") 
+usethis::use_package("recipes")
+usethis::use_package("yardstick")
+```
+
+
+## Import from
+
+```{r}
+usethis::use_import_from("rlang", ":=") # Must have
+
+usethis::use_import_from("stats", 
+               c("formula", "lm", "p.adjust", "setNames","shapiro.test")
+               )
+
+usethis::use_import_from("stats", "terms")
+```
+
+# Define Global variables
+
+
+```{r}
+# Put this in  R/globals.R
+# utils::globalVariables(c("var1"))
+usethis::use_r("globals.R")
+```

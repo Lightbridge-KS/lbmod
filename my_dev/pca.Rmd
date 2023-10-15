@@ -1,0 +1,68 @@
+---
+title: "PCA Plotting"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file()) # Set WD to Root
+here::i_am("my_dev/pca.Rmd")
+library(here)
+```
+
+```{r}
+usethis::use_r("pca.R")
+```
+
+
+## PCA Dependency 
+
+```{r PCA_dep}
+usethis::use_package("forcats")
+usethis::use_package("tidytext")
+usethis::use_package("glue")
+usethis::use_package(c("tidyr"))
+usethis::use_package(c("ggplot2"))
+usethis::use_package(c("ggrepel"))
+
+usethis::use_package("recipes")
+usethis::use_package("yardstick")
+```
+
+```{r}
+usethis::use_import_from("stats", "terms")
+```
+
+## Testing
+
+
+### Bi Plot
+
+```{r}
+iris |> 
+ lbmod::prep_pca()
+```
+
+
+```{r}
+iris |> 
+ lbmod::prep_pca() |> 
+ lbmod::pca_biplot(geom_label_fun = ggrepel::geom_label_repel)
+```
+
+### Scree Plot
+
+```{r}
+iris %>%
+ lbmod::prep_pca() %>%
+ lbmod::pca_scree_plot()
+```
+
+### Load Plot
+
+
+```{r}
+iris %>%
+ lbmod::prep_pca() %>% 
+ lbmod::pca_load_plot(num_comp = 1:2, num_top_vars = 2)
+```
+
