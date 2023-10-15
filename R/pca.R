@@ -146,7 +146,7 @@ pca_load_plot <- function(pca_recipe,
 
   load_df <- pca_recipe %>%
     yardstick::tidy(id = "pca")
-
+  pc_percent <- get_pc_percent_label(pca_recipe)
 
   load_df_mod <- load_df %>%
     # Filter Components
@@ -164,7 +164,9 @@ pca_load_plot <- function(pca_recipe,
   load_df_mod %>%
     ggplot2::ggplot(ggplot2::aes(abs(value), terms, fill = value > 0)) +
     ggplot2::geom_col(...) +
-    ggplot2::facet_wrap(~component, scales = "free_y", nrow = nrow, ncol = ncol) +
+    ggplot2::facet_wrap(~component,
+                        labeller = ggplot2::labeller(component = pc_percent),
+                        scales = "free_y", nrow = nrow, ncol = ncol) +
     tidytext::scale_y_reordered() +
     ggplot2::scale_fill_manual(values = fill) +
     ggplot2::labs(
@@ -172,6 +174,7 @@ pca_load_plot <- function(pca_recipe,
       y = NULL, fill = "Positive?"
     )
 }
+
 
 # Loading Score Plot (All) ---------------------------------------------------------
 
@@ -204,6 +207,8 @@ pca_load_plot_all <- function(pca_recipe,
   load_df <- pca_recipe %>%
     yardstick::tidy(id = "pca")
 
+  pc_percent <- get_pc_percent_label(pca_recipe)
+
   load_df_mod <- load_df %>%
     # Filter Components
     dplyr::filter(component %in% c(paste0("PC", num_comp))) |>
@@ -213,7 +218,8 @@ pca_load_plot_all <- function(pca_recipe,
   load_df_mod |>
     ggplot2::ggplot(ggplot2::aes(value, terms, fill = terms)) +
     ggplot2::geom_col(show.legend = FALSE) +
-    ggplot2::facet_wrap(~component, nrow = 1) +
+    ggplot2::facet_wrap(~component, nrow = 1,
+                        labeller = ggplot2::labeller(component = pc_percent)) +
     ggplot2::labs(x = "Absolute value of contribution", y = NULL)
 
 }
@@ -482,6 +488,32 @@ geom_arrow_pca <- function(pca_recipe,
 
 
   seg
+}
+
+
+# Helper: Get PC% Label ---------------------------------------------------
+
+#' Get vector of %PC for label
+#'
+#' Intended to used in `ggplot2::labeller()`
+#'
+#' @param pca_recipe Object class recipe that already `step_pca`
+#' @param digits Round digits
+#'
+#' @return A named vector
+#'
+get_pc_percent_label <- function(pca_recipe, digits = 0) {
+
+  percent <- pca_recipe |>
+    yardstick::tidy(id = "pca", type = "variance") %>%
+    dplyr::filter(terms == "percent variance") %>%
+    dplyr::pull(value) %>%
+    round(digits = digits) |>
+    as.character()
+
+  pc <- paste0("PC", 1:length(percent))
+  setNames(paste0(pc, " (", percent ,"%)"), pc)
+
 }
 
 

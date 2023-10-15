@@ -74,3 +74,12 @@ iris %>%
  lbmod::prep_pca() %>% 
  lbmod::pca_load_plot_all()
 ```
+
+## Helper
+
+### Get PC% for Label
+
+```{r}
+get_pc_percent_label(prep_pca(iris))
+```
+
