@@ -6,7 +6,8 @@
 \usage{
 pca_load_plot(
   pca_recipe,
-  component = "all",
+  num_comp = 1:4,
+  num_top_vars = Inf,
   fill = c("#b6dfe2", "#0A537D"),
   nrow = NULL,
   ncol = NULL,
@@ -16,7 +17,9 @@ pca_load_plot(
 \arguments{
 \item{pca_recipe}{Object class recipe that already \code{step_pca}}
 
-\item{component}{Integer vector indicate which PCs to show, the default "all" shows every components.}
+\item{num_comp}{Integer vector indicate which PCs to show.}
+
+\item{num_top_vars}{Integer indicate number of top variables, ranking by absolute loading score, to show. Default \code{Inf} means all variables.}
 
 \item{fill}{(character) Fill of positive & negative values}
 

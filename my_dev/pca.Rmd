@@ -59,6 +59,7 @@ iris %>%
 
 ### Load Plot
 
+#### Top
 
 ```{r}
 iris %>%
@@ -66,3 +67,10 @@ iris %>%
  lbmod::pca_load_plot(num_comp = 1:2, num_top_vars = 2)
 ```
 
+#### All
+
+```{r}
+iris %>%
+ lbmod::prep_pca() %>% 
+ lbmod::pca_load_plot_all()
+```

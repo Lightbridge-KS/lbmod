@@ -173,6 +173,51 @@ pca_load_plot <- function(pca_recipe,
     )
 }
 
+# Loading Score Plot (All) ---------------------------------------------------------
+
+
+#' Plot All Loading Score from PCA
+#'
+#' Plot all of the variables (loading) in a single plot.
+#'
+#' @param pca_recipe Object class recipe that already `step_pca`
+#' @param num_comp Integer vector indicate which PCs to show.
+#'
+#' @return Plot
+#'
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate
+#' @importFrom ggplot2 ggplot aes geom_col facet_wrap scale_fill_manual labs
+#' @importFrom forcats as_factor fct_inorder
+#' @importFrom tidytext reorder_within scale_y_reordered
+#' @importFrom yardstick tidy
+#' @export
+#'
+#' @examples
+#' library(magrittr)
+#' library(lbmod)
+#' iris %>%
+#'   prep_pca() %>%
+#'   pca_load_plot_all()
+pca_load_plot_all <- function(pca_recipe,
+                              num_comp = 1:4) {
+  load_df <- pca_recipe %>%
+    yardstick::tidy(id = "pca")
+
+  load_df_mod <- load_df %>%
+    # Filter Components
+    dplyr::filter(component %in% c(paste0("PC", num_comp))) |>
+    dplyr::mutate(component = forcats::as_factor(component)) %>%
+    dplyr::mutate(component = forcats::fct_inorder(component))
+
+  load_df_mod |>
+    ggplot2::ggplot(ggplot2::aes(value, terms, fill = terms)) +
+    ggplot2::geom_col(show.legend = FALSE) +
+    ggplot2::facet_wrap(~component, nrow = 1) +
+    ggplot2::labs(x = "Absolute value of contribution", y = NULL)
+
+}
+
 # Bi-plot (Main function) ------------------------------------------------------------
 
 
