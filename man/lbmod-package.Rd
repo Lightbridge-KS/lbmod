@@ -6,8 +6,7 @@
 \alias{lbmod-package}
 \title{lbmod: Statistic & Modeling Function}
 \description{
-My wrapper package of various statistical and machine
-    learning functions.
+My wrapper package of various statistical and machine learning functions.
 }
 \author{
 \strong{Maintainer}: Kittipos Sirivongrungson \email{ki11ip0.s.a.s@gmail.com}

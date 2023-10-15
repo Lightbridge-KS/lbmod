@@ -219,6 +219,7 @@ pca_load_plot <- function(pca_recipe,
 pca_biplot <- function(pca_recipe,
                        mapping = NULL,            # aesthetic of geom_point()
                        x = PC1, y = PC2,   # X and Y axis
+                       include_vars = NULL, # Varible for the arrow
 
                        alpha = 0.8, size = 2,      # Point
                        geom_type_scatter = geom_point, ## Type of scatter plot
@@ -227,28 +228,11 @@ pca_biplot <- function(pca_recipe,
                        arrow_scale = 1,
                        color_arrow = "black",
 
-                       geom_type = geom_label,     ## Label : geom_label or geom_text
-                       hjust = 0, vjust = 1, size_txt = 3,
-                       color = '#0A537D',
-
-                       check_overlap = FALSE, # if Geom_text
-
-                       label.padding = ggplot2::unit(0.25, "lines"), # if Geom_label
-                       label.r = ggplot2::unit(0.15, "lines"),
-                       label.size = 0.25,
-
-                       # to geom_label_repel or geom_text_repel
-
-                       segment.color = "black", # NA = no line segment
-                       min.segment.length = 0.5, # min length to point that draw segment
-                       force = 1, # push force for overlapping label
-                       force_pull = 1,  # pull force to data point
-                       max.overlaps = 10, # maximum label overlap
-                       size_ggrepel = 2, # Size of label
+                       geom_label_fun = ggplot2::geom_label,
+                       geom_label_args = list(color = "midnightblue"),
                        ... # to geom_point()
 ) {
 
-  geom_type <- rlang::enexpr(geom_type)
   geom_type_scatter <- rlang::enexpr(geom_type_scatter)
 
   pca_recipe %>%
@@ -256,31 +240,19 @@ pca_biplot <- function(pca_recipe,
                      geom_type = !!geom_type_scatter,
                      alpha = alpha, size = size, ...) +
     geom_arrow_pca(pca_recipe,
+                   include_vars = include_vars,
                    x = {{x}}*arrow_scale,
                    y = {{y}}*arrow_scale,
                    x_origin = x_origin, y_origin = y_origin,
                    color = color_arrow) +
     geom_label_pca(pca_recipe,
+                   include_vars = include_vars,
                    x = {{x}}*arrow_scale + x_origin,
                    y = {{y}}*arrow_scale + y_origin,
-                   geom_type = !!geom_type,
-                   hjust = hjust, vjust = vjust, size = size_txt,
-                   color = color,
-                   check_overlap = check_overlap, # if Geom_text
-
-                   label.padding = label.padding, # if Geom_label
-                   label.r = label.r,
-                   label.size = label.size,
-
-                   segment.color = segment.color, # if geom_label_repel or geom_text_repel
-                   min.segment.length = min.segment.length,
-                   force = force,
-                   force_pull = force_pull,
-                   max.overlaps = max.overlaps,
-                   size_ggrepel = size_ggrepel
+                   geom_label_fun = geom_label_fun,
+                   geom_label_args = geom_label_args
     )
 }
-
 
 
 
@@ -362,129 +334,48 @@ pca_scatter_plot <- function(pca_recipe,
 
 # Label layer - to add to scatter plot ------------------------------------
 
-
 #' Vector's Label for PCA bi-plot
 #'
 #' @param pca_recipe Object class recipe that already `step_pca`
+#' @param include_vars Variable to be included in the arrow, `NULL` (default) to include all variables.
 #' @param x unquoted name to specify which principle component to plot in x-axis (must be one of PC1, PC2, PC3, ... ,etc.)
 #' @param y unquoted name to specify which principle component to plot in y-axis (must be one of PC1, PC2, PC3, ... ,etc.)
-#' @param geom_type unquoted name of geom to use, must be one of `geom_label`, `geom_label_repel`, `geom_text`, or `geom_text_repel`
-#' @param hjust (numeric) passed to `geom_text` or `geom_label`
-#' @param vjust (numeric) passed to `geom_text` or `geom_label`
-#' @param size (numeric) passed to `geom_text` or `geom_label`
-#' @param color passed to `geom_text` or `geom_label`
-#' @param check_overlap passed to `geom_text`
-#' @param label.padding passed to `geom_label`
-#' @param label.r passed to `geom_label`
-#' @param label.size passed to `geom_label`
-#' @param segment.color passed to `geom_label_repel` or `geom_text_repel`
-#' @param min.segment.length passed to `geom_label_repel` or `geom_text_repel`
-#' @param force passed to `geom_label_repel` or `geom_text_repel`
-#' @param force_pull passed to `geom_label_repel` or `geom_text_repel`
-#' @param max.overlaps passed to `geom_label_repel` or `geom_text_repel`
-#' @param size_ggrepel passed to `geom_label_repel` or `geom_text_repel`
-#' @param ... passed to geom that specified by `geom_type` argument
+#' @param geom_label_fun Labelling geom function
+#' @param geom_label_args Args to `geom_label_fun`
+#' @param ... Args to `geom_label_fun`
 #'
 #' @return plot label
-#'
-#' @importFrom magrittr %>%
-#' @importFrom rlang as_string enexpr
-#' @importFrom tidyr pivot_wider
-#' @importFrom ggplot2 unit  aes geom_label geom_text
-#' @importFrom ggrepel geom_label_repel geom_text_repel
-#' @importFrom yardstick tidy
 #' @export
 #'
 #' @examples
-#' library(magrittr)
 #' library(lbmod)
-#' prep_pca(iris) %>%
+#' prep_pca(iris) |>
 #'   pca_scatter_plot(ggplot2::aes(color = Species)) +
 #'   geom_label_pca(prep_pca(iris))
 geom_label_pca <- function(pca_recipe,
+                           include_vars = NULL,
                            x = PC1, y = PC2,  # both geom_text or geom_label
-                           geom_type = geom_label,
-                           hjust = 0, vjust = 1, size = 3,
-                           color = '#0A537D',
+                           geom_label_fun = ggplot2::geom_label,
+                           geom_label_args = list(color = 'midnightblue'),
+                           ...
+) {
 
-                           check_overlap = FALSE, # to Geom_text
-
-                           label.padding = ggplot2::unit(0.25, "lines"), # to Geom_label
-                           label.r = ggplot2::unit(0.15, "lines"),
-                           label.size = 0.25,
-
-                           segment.color = "black", # to geom_label_repel or geom_text_repel
-                           min.segment.length = 0.5,
-                           force = 1,
-                           force_pull = 1,
-                           max.overlaps = 10,
-                           size_ggrepel = 2,
-
-                           ...) {
-
-  # require(ggplot2)
-  # require(yardstick)
-  # require(rlang)
 
   pca_load_wide <- pca_recipe %>%
     yardstick::tidy(id = "pca") %>%
     tidyr::pivot_wider(names_from = component, id_cols = terms)
 
-  switch (rlang::as_string(rlang::enexpr(geom_type)),
-          "geom_label" = {
+  if(!is.null(include_vars)) {
+    pca_load_wide <- pca_load_wide %>%
+      dplyr::filter(terms %in% include_vars)
+  }
 
-            ggplot2::geom_label(data = pca_load_wide,
-                                ggplot2::aes(x = {{x}}, y = {{y}}, label = terms),
-                                hjust = hjust,
-                                vjust = vjust,
-                                size = size,
-                                color = color,
-                                label.padding = label.padding,
-                                label.r = label.r,
-                                label.size = label.size, ...)
-
-          },
-          "geom_label_repel" = {
-
-            ggrepel::geom_label_repel(mapping = ggplot2::aes(x = {{x}}, y = {{y}}, label = terms),
-                                      data = pca_load_wide,
-
-                                      segment.color = segment.color,
-                                      min.segment.length = min.segment.length,
-                                      force = force,
-                                      force_pull = force_pull,
-                                      max.overlaps = max.overlaps,
-                                      size = size_ggrepel,
-                                      ...
-            )
-          },
-          "geom_text" = {
-
-            ggplot2::geom_text(data = pca_load_wide,
-                               ggplot2::aes(x = {{x}}, y = {{y}}, label = terms),
-                               hjust = hjust,
-                               vjust = vjust,
-                               size = size,
-                               color = color,
-                               check_overlap = check_overlap, ...)
-          },
-          "geom_text_repel" = {
-
-            ggrepel::geom_text_repel(mapping = ggplot2::aes(x = {{x}}, y = {{y}}, label = terms),
-                                     data = pca_load_wide,
-
-                                     segment.color = segment.color,
-                                     min.segment.length = min.segment.length,
-                                     force = force,
-                                     force_pull = force_pull,
-                                     max.overlaps = max.overlaps,
-                                     size = size_ggrepel,
-                                     ...
-            )
-
-          },
-          stop("`geom_type` must be geom_text, geom_text_repel, geom_label or geom_label_repel", call. = F)
-  )
+  call <- rlang::call2(geom_label_fun,
+                       data = pca_load_wide,
+                       ggplot2::aes(x = {{x}}, y = {{y}}, label = terms),
+                       !!!geom_label_args,
+                       ...)
+  eval(call)
 }
 
 

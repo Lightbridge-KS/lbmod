@@ -9,6 +9,7 @@ pca_biplot(
   mapping = NULL,
   x = PC1,
   y = PC2,
+  include_vars = NULL,
   alpha = 0.8,
   size = 2,
   geom_type_scatter = geom_point,
@@ -16,21 +17,8 @@ pca_biplot(
   y_origin = 0,
   arrow_scale = 1,
   color_arrow = "black",
-  geom_type = geom_label,
-  hjust = 0,
-  vjust = 1,
-  size_txt = 3,
-  color = "#0A537D",
-  check_overlap = FALSE,
-  label.padding = ggplot2::unit(0.25, "lines"),
-  label.r = ggplot2::unit(0.15, "lines"),
-  label.size = 0.25,
-  segment.color = "black",
-  min.segment.length = 0.5,
-  force = 1,
-  force_pull = 1,
-  max.overlaps = 10,
-  size_ggrepel = 2,
+  geom_label_fun = ggplot2::geom_label,
+  geom_label_args = list(color = "midnightblue"),
   ...
 )
 }
@@ -56,6 +44,8 @@ pca_biplot(
 \item{arrow_scale}{(numeric) scale factor of the arrow (passed to \code{lbmod::geom_arrow_pca})}
 
 \item{color_arrow}{(character) color of the arrow (passed to \code{lbmod::geom_arrow_pca})}
+
+\item{...}{passed to \code{geom_point}}
 
 \item{geom_type}{unquoted name of geom to use, must be one of \code{geom_label}, \code{geom_label_repel}, \code{geom_text}, or \code{geom_text_repel}}
 
@@ -86,8 +76,6 @@ pca_biplot(
 \item{max.overlaps}{maximum label overlapping (passed to \code{geom_label_repel} or \code{geom_text_repel})}
 
 \item{size_ggrepel}{size of the label (passed to \code{geom_label_repel} or \code{geom_text_repel})}
-
-\item{...}{passed to \code{geom_point}}
 }
 \value{
 plot
