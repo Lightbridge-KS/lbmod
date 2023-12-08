@@ -47,3 +47,52 @@ parse_to_formula <- function(fun, lhs, rhs, ...) {
 lbmod::parse_to_formula(lm, "Sepal.Length", "Sepal.Width", data = iris)
 ```
 
+# Fn: Parse to formula (2 Sided) [New]
+
+```{r parse_to_formula_2s}
+parse_to_formula_2s <- function(fun = "lm", lhs, rhs, 
+                                args = list(), 
+                                pkg = "stats") {
+
+  lhs <- rlang::ensym(lhs)
+  rhs <- rlang::ensym(rhs)
+  form2 <- rlang::new_formula(lhs, rhs)
+  call <- rlang::call2(fun, form2, .ns = pkg, !!!args)
+  eval(call)
+
+}
+
+parse_to_formula_2s(fun = "lm", "Sepal.Length", "Species",
+                    pkg = "stats", args = list(data = iris))
+# lm(Sepal.Length ~ Species, data = iris)
+```
+
+
+```{r}
+test_pluck_formula <- function(a, b) {
+  
+  a <- rlang::ensym(a)
+  b <- rlang::ensym(b)
+  f <- rlang::new_formula(a, b)
+  f
+}
+
+test_pluck_formula("c", "d")
+```
+
+
+```{r}
+rlang::new_formula(quote(a), quote(b))
+
+rlang::new_formula(rlang::expr(a), quote(b))
+rlang::new_formula(rlang::expr(a), quote(b))
+rlang::new_formula("a", quote(b))
+
+lm(rlang::new_formula(quote(Sepal.Length), quote(Species)), data = iris)
+
+lm(rlang::new_formula(rlang::sym("Sepal.Length"), rlang::sym("Species")), 
+   data = iris)
+
+lm(Sepal.Length ~ Species, data = iris)
+```
+

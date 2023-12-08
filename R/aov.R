@@ -278,29 +278,7 @@ is_res_identical <- function(df, num_var, fct_var) {
 
 }
 
-# Parse variable to formula -----------------------------------------------
 
-parse_to_formula_2 <- function(df, fun, lhs, rhs, args = NULL) { # args as list pass to fun
-
-  lhs <- dplyr::ensym(lhs)
-  rhs <- dplyr::ensym(rhs)
-  fun <- dplyr::ensym(fun)
-
-  eval( dplyr::expr((!!fun)(!!lhs ~ !!rhs, data = df, !!!args)) )
-
-}
-
-parse_to_formula <- function(df, fun, lhs, rhs, ...) {
-
-
-  lhs <- dplyr::ensym(lhs)
-  rhs <- dplyr::ensym(rhs)
-  fun <- dplyr::ensym(fun)
-  dot <- dplyr::enexprs(...)
-
-  eval( dplyr::expr((!!fun)(!!lhs ~ !!rhs, data = df, !!!dot)) )
-
-}
 
 
 # Get factor levels -------------------------------------------------------
@@ -352,7 +330,7 @@ shapiro <- function(df, num_vars){
 
 shapiro_lm_res_s <- function(df, num_var, fct_var) {
 
-  res <- parse_to_formula(df, lm, !!num_var, !!fct_var)$residuals
+  res <- parse_to_formula(lm, !!num_var, !!fct_var, data = df)$residuals
   shapiro.test(res)
 
 }
