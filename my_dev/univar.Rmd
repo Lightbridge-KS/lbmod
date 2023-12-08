@@ -1,0 +1,98 @@
+---
+title: "Univariate Models"
+author: "kittipos sirivongrungson"
+date: "2023-12-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+here::i_am("my_dev/univar.Rmd")
+library(here)
+```
+
+```{r}
+usethis::use_r("univar_multi")
+```
+
+
+# Data
+
+```{r}
+iris2 <- iris |> dplyr::filter(Species != "setosa")
+
+glm(Species ~ Sepal.Length, data = iris2, family = "binomial") |> 
+  broom::tidy()
+```
+
+# Multiple Univariate Model
+
+## UV bare
+
+```{r univar_multi_bare}
+univar_multi_bare <- function(data, fun = "lm", y_var, x_vars, 
+                              pkg = "stats", ...) {
+  
+  dot <- rlang::list2(...)
+  setNames(x_vars, x_vars) |> 
+    purrr::map(
+      ~ parse_to_formula_2s(fun, lhs = !!y_var, rhs = !!.x, pkg = pkg,
+                            args = rlang::list2(data = data, !!!dot))
+    ) 
+
+}
+
+iris |> univar_multi_bare(fun = "lm", "Sepal.Length", "Species")
+```
+
+
+
+## UV with Tidy
+
+```{r univar_multi_tidy}
+univar_multi_tidy <- function(data, fun = "lm", y_var, x_vars, 
+                              pkg = "stats", ...) {
+  
+  dot <- rlang::list2(...)
+  setNames(x_vars, x_vars) |> 
+    purrr::map(
+      ~ parse_to_formula_2s(fun, lhs = !!y_var, rhs = !!.x, pkg = pkg,
+                            args = rlang::list2(data = data, !!!dot))
+    ) |> 
+    purrr::map_dfr(broom::tidy, .id = "x_vars") |> 
+    dplyr::filter(term != "(Intercept)")
+
+}
+
+iris |> univar_multi_tidy(fun = "lm", "Sepal.Length", "Species")
+iris |> univar_multi_tidy(fun = "lm", "Sepal.Length", c("Species", "Petal.Width"))
+
+iris2 |> univar_multi_tidy(fun = "glm", "Species", "Sepal.Length", 
+                          family = binomial())
+```
+
+
+
+## UV with glance
+
+```{r univar_multi_glance}
+univar_multi_glance <- function(data, fun = "lm", y_var, x_vars, 
+                              pkg = "stats", ...) {
+  
+  dot <- rlang::list2(...)
+  setNames(x_vars, x_vars) |> 
+    purrr::map(
+      ~ parse_to_formula_2s(fun, lhs = !!y_var, rhs = !!.x, pkg = pkg,
+                            args = rlang::list2(data = data, !!!dot))
+    ) |> 
+    purrr::map_dfr(broom::glance, .id = "x_vars") 
+
+}
+
+iris |> univar_multi_glance(fun = "lm", "Sepal.Length", "Species")
+iris |> univar_multi_glance(fun = "lm", "Sepal.Length", c("Species", "Petal.Width"))
+
+iris2 |> univar_multi_glance(fun = "glm", "Species", "Sepal.Length", 
+                          family = binomial())
+```
+
